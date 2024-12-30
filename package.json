@@ -1,0 +1,12 @@
+{
+  "name": "dbchord-db-migration",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cross-env FORCE_COLOR=0 WRANGLER_LOG=none wrangler d1 execute dbchord --yes --remote"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "wrangler": "^3.99.0"
+  }
+}
