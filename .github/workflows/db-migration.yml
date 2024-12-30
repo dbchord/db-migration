@@ -38,7 +38,7 @@ jobs:
         run: |
           start=${{ github.event.inputs.start }}
           counter=0
-          for file in ./dbchord-sql/*; do
+          for file in ./db-sql/*; do
             if [[ -f "$file" && $counter -gt $start ]]; then
               echo "[$((counter+1))]: $file"
               echo | npm start -- --file=$file
