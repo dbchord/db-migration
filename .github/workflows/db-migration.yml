@@ -73,7 +73,7 @@ jobs:
 
               if [[ $success == false ]]; then
                 echo "Failed to process file after $max_retries attempts: $file"
-                exit 1
+                continue
               fi
             fi
 
@@ -87,8 +87,8 @@ jobs:
 
       # Upload Wrangler Logs
       - name: Upload Wrangler Logs
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
         with:
           name: wrangler-logs
           path: /home/runner/.config/.wrangler/logs/
