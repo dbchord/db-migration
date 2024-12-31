@@ -75,7 +75,7 @@ jobs:
               if [[ $success == false ]]; then
                 URL=https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage
                 MESSAGE="Failed to migrate! [INDEX: $idx] [FILE: $file]"
-                curl -s -X POST $URL -d chat_id=$TELEGRAM_CHAT_ID -d text=$MESSAGE > /dev/null 2>&1
+                curl -s -X POST $URL -d chat_id=$TELEGRAM_CHAT_ID -d text="$MESSAGE" > /dev/null 2>&1
                 continue
               fi
             fi
