@@ -38,12 +38,37 @@ jobs:
         run: |
           start=${{ github.event.inputs.start }}
           counter=0
+          max_retries=3
+          retry_delay=3
+
           for file in ./db-sql/*; do
             if [[ -f "$file" && $counter -gt $start ]]; then
-              echo "[$((counter+1))]: $file"
-              echo | npm start -- --file=$file
+              attempt=0
+              success=false
+
+              while [[ $attempt -lt $max_retries ]]; do
+                echo "[$((counter+1))] ($((attempt+1)) / $((max_retries))): $file"
+                echo | npm start -- --file=$file
+
+                # Check if the command was successful
+                if [[ $? -eq 0 ]]; then
+                  success=true
+                  break
+                else
+                  echo "Error processing file: $file. Retrying in $retry_delay seconds..."
+                  sleep $retry_delay
+                fi
+
+                attempt=$((attempt + 1))
+              done
+
+              if [[ $success == false ]]; then
+                echo "Failed to process file after $max_retries attempts: $file"
+                exit 1
+              fi
             fi
-            counter=$((counter+1))
+
+            counter=$((counter + 1))
           done
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
