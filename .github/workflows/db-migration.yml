@@ -44,6 +44,7 @@ jobs:
       # Run npm script
       - name: Run Script
         run: |
+          set +e  # Disable exit on error
           idx=0
           start=${{ github.event.inputs.start }}
           max_retries=${{ github.event.inputs.max_retries }}
