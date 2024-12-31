@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cross-env FORCE_COLOR=0 WRANGLER_LOG=error wrangler d1 execute dbchord --yes --remote"
+    "start": "cross-env FORCE_COLOR=0 WRANGLER_LOG=debug wrangler d1 execute dbchord --yes --remote"
   },
   "dependencies": {
     "cross-env": "^7.0.3",

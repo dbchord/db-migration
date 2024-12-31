@@ -7,6 +7,14 @@ on:
         description: "Enter the starting number"
         required: true
         default: "1"
+      max_retries:
+        description: "Enter the max retries"
+        required: true
+        default: "3"
+      retry_delay:
+        description: "Enter the retry delay"
+        required: true
+        default: "3"
 
 jobs:
   db-migration:
@@ -36,18 +44,18 @@ jobs:
       # Run npm script
       - name: Run Script
         run: |
+          idx=0
           start=${{ github.event.inputs.start }}
-          counter=0
-          max_retries=3
-          retry_delay=3
+          max_retries=${{ github.event.inputs.max_retries }}
+          retry_delay=${{ github.event.inputs.retry_delay }}
 
           for file in ./db-sql/*; do
-            if [[ -f "$file" && $counter -gt $start ]]; then
+            if [[ -f "$file" && $idx -gt $start ]]; then
               attempt=0
               success=false
 
               while [[ $attempt -lt $max_retries ]]; do
-                echo "[$((counter+1))] ($((attempt+1)) / $((max_retries))): $file"
+                echo "[$((idx+1))] ($((attempt+1))/$((max_retries))): $file"
                 echo | npm start -- --file=$file
 
                 # Check if the command was successful
@@ -55,6 +63,7 @@ jobs:
                   success=true
                   break
                 else
+                  curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d "chat_id=$TELEGRAM_CHAT_ID" -d "text=Failed to migrate!\nIndex: $idx\nFile: $file"
                   echo "Error processing file: $file. Retrying in $retry_delay seconds..."
                   sleep $retry_delay
                 fi
@@ -68,8 +77,18 @@ jobs:
               fi
             fi
 
-            counter=$((counter + 1))
+            idx=$((idx + 1))
           done
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # Upload Wrangler Logs
+      - name: Upload Wrangler Logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: wrangler-logs
+          path: /home/runner/.config/.wrangler/logs/
